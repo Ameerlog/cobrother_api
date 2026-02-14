@@ -38,7 +38,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin
+
 public class DomainController {
 
     private final DomainService domainService;

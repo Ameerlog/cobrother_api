@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin
+
 public class CoWorkingController {
 
     public final CoWorkingService service;

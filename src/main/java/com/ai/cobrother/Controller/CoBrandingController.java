@@ -43,7 +43,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin
+
 public class CoBrandingController {
 
     private final CoBrandingService service;
