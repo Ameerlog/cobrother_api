@@ -65,6 +65,7 @@ public class FileService {
         Files.copy(file.getInputStream(), filePath);
 
 //        return "http://localhost:8080/uploads/" + fileName;
-        return "http://192.168.29.184:8080/uploads/" + fileName;
+        return "http://cobrother-api.onrender.com/tmp/uploads/" + fileName;
+        
     }
 }
