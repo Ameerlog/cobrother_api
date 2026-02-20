@@ -4,7 +4,7 @@
     import org.springframework.data.mongodb.core.mapping.Document;
 
     @Document(collection = "CoBranding")
-    public class CoBranding {
+    public class CoVenture {
 
             @Id
             private String id;

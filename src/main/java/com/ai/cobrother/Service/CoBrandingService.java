@@ -1,10 +1,9 @@
 package com.ai.cobrother.Service;
 
-import com.ai.cobrother.Model.CoBranding;
+import com.ai.cobrother.Model.CoVenture;
 import com.ai.cobrother.Repository.CoBrandingRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,11 +17,11 @@ public class CoBrandingService {
         this.cobrandrepo = cobrandrepo;
     }
 
-    public CoBranding CreateCoBranding(CoBranding cobrand){
+    public CoVenture CreateCoBranding(CoVenture cobrand){
        return cobrandrepo.save(cobrand);
     }
 
-    public List<CoBranding> getAllBrands(){
+    public List<CoVenture> getAllBrands(){
         return cobrandrepo.findAll();
     }
 }

@@ -1,6 +1,6 @@
 package com.ai.cobrother.Controller;
 
-import com.ai.cobrother.Model.CoBranding;
+import com.ai.cobrother.Model.CoVenture;
 import com.ai.cobrother.Service.CoBrandingService;
 import com.ai.cobrother.Service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,16 +56,16 @@ public class CoBrandingController {
         this.fileService = fileService;
     }
 
-    @PostMapping(value = "/createCoBranding",
+    @PostMapping(value = "/createCoVenture",
             consumes = "multipart/form-data")
-    public CoBranding createCoBranding(
+    public CoVenture createCoBranding(
             @RequestPart("data") String data,
             @RequestPart("logo") MultipartFile logo
     ) throws Exception {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        CoBranding coBrand = mapper.readValue(data, CoBranding.class);
+        CoVenture coBrand = mapper.readValue(data, CoVenture.class);
 
         System.out.println("BrandDetails: " + coBrand.getBrandDetails());
 
@@ -77,7 +77,7 @@ public class CoBrandingController {
     }
 
     @GetMapping("/ListAllBrands")
-    public List<CoBranding> getAllBrands(){
+    public List<CoVenture> getAllBrands(){
         return service.getAllBrands();
     }
 }

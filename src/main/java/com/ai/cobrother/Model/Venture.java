@@ -9,10 +9,16 @@ public class Venture {
     public String phone;
     public String location;
     public String gstNo;
+//    public String logoUrl;
 
 
-
-
+//    public String getLogoUrl() {
+//        return logoUrl;
+//    }
+//
+//    public void setLogoUrl(String logoUrl) {
+//        this.logoUrl = logoUrl;
+//    }
 
     public String getId() {
         return id;
