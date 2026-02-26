@@ -65,7 +65,7 @@ public class LinkedInAuthController {
 //    }
 
 
-    @GetMapping("/linkedin/callback")
+     @GetMapping("/linkedin/callback")
     public void handleCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
 
         // 1️⃣ Get access token
@@ -78,6 +78,9 @@ public class LinkedInAuthController {
         String jwtToken = linkedInAuthService.loginOrRegister(profile);
 
         // 4️⃣ Redirect to frontend with token in URL
-        response.sendRedirect("http://192.168.29.186:3000/?token=" + jwtToken);
+//        response.sendRedirect("http://192.168.29.186:3000/coworker-form?token=" + jwtToken);
+        String frontendUrl = "https://cobrother.com/login?token=" + jwtToken;
+
+        response.sendRedirect(frontendUrl);
     }
 }
