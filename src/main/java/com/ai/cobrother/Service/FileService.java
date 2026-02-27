@@ -1,6 +1,11 @@
 package com.ai.cobrother.Service;
 
+import com.mongodb.client.gridfs.model.GridFSFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +18,9 @@ import java.util.UUID;
 @Service
 public class FileService {
 
+    @Autowired
+    private GridFsTemplate gridFsTemplate;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -20,19 +28,19 @@ public class FileService {
     private String uploadedFileBaseUrl;
 
     public String uploadFile(MultipartFile file) throws Exception {
-
         File dir = new File(uploadDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = Paths.get(uploadDir, fileName);
-
         Files.copy(file.getInputStream(), filePath);
+        return uploadedFileBaseUrl + "/uploads/" + fileName;
+    }
 
-//        return "http://localhost:8080/uploads/" + fileName;
-        // return "http://192.168.29.184:8080/uploads/" + fileName;
-       return uploadedFileBaseUrl + "/uploads/" + fileName;
+    public GridFSFile getFile(String fileId) {
+        return gridFsTemplate.findOne(
+            new Query(Criteria.where("_id").is(fileId))
+        );
     }
 }

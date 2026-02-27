@@ -1,50 +1,40 @@
-package com.ai.cobrother.Service;
+package com.ai.cobrother.Controller;
 
+import com.ai.cobrother.Service.FileService;
 import com.mongodb.client.gridfs.model.GridFSFile;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.gridfs.GridFsTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+import java.io.IOException;
 
-@Service
-public class FileService {
+@RestController
+@RequestMapping("/api/images")
+public class ImageController {
 
     @Autowired
-    private GridFsTemplate gridFsTemplate;
+    private FileService fileService;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    @Autowired
+    private GridFsOperations gridFsOperations;
 
-    @Value("${app.base-url:https://cobrother-api.onrender.com}")
-    private String uploadedFileBaseUrl;
-
-    public String uploadFile(MultipartFile file) throws Exception {
-
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
+    @GetMapping("/{fileId}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String fileId) throws IOException {
+        GridFSFile gridFSFile = fileService.getFile(fileId);
+        if (gridFSFile == null) {
+            return ResponseEntity.notFound().build();
         }
-
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir, fileName);
-
-        Files.copy(file.getInputStream(), filePath);
-
-        return uploadedFileBaseUrl + "/uploads/" + fileName;
-    }
-
-    public GridFSFile getFile(String fileId) {
-        return gridFsTemplate.findOne(
-            new Query(Criteria.where("_id").is(fileId))
-        );
+        GridFsResource resource = gridFsOperations.getResource(gridFSFile);
+        String contentType = gridFSFile.getMetadata() != null
+                ? gridFSFile.getMetadata().get("_contentType").toString()
+                : "application/octet-stream";
+        byte[] data = IOUtils.toByteArray(resource.getInputStream());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(data);
     }
 }
