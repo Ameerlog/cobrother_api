@@ -68,8 +68,6 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
                 "http://192.168.29.186:5173",
                 "https://start-up-tobe.vercel.app",
                 "https://www.cobrother.com",
