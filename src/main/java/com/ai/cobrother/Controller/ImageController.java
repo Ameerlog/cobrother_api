@@ -1,55 +1,50 @@
-package com.ai.cobrother.Controller;
+package com.ai.cobrother.Service;
 
-import com.ai.cobrother.Service.FileService;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
-import org.springframework.data.mongodb.gridfs.GridFsResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/images")
-public class ImageController {
+@Service
+public class FileService {
 
     @Autowired
-    private FileService fileService;
+    private GridFsTemplate gridFsTemplate;
 
-    @Autowired
-    private GridFsOperations gridFsOperations;
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
-    /**
-     * Endpoint to serve images from GridFS
-     * Example: GET /api/images/{fileId}
-     */
-    @GetMapping("/{fileId}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String fileId) throws IOException {
+    @Value("${app.base-url:https://cobrother-api.onrender.com}")
+    private String uploadedFileBaseUrl;
 
-        // Get file from GridFS
-        GridFSFile gridFSFile = fileService.getFile(fileId);
+    public String uploadFile(MultipartFile file) throws Exception {
 
-        if (gridFSFile == null) {
-            return ResponseEntity.notFound().build();
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
 
-        // Get file resource
-        GridFsResource resource = gridFsOperations.getResource(gridFSFile);
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
 
-        // Get file content type (image/png, image/jpeg, etc.)
-        String contentType = gridFSFile.getMetadata() != null
-                ? gridFSFile.getMetadata().get("_contentType").toString()
-                : "application/octet-stream";
+        Files.copy(file.getInputStream(), filePath);
 
-        // Convert to byte array
-        byte[] data = IOUtils.toByteArray(resource.getInputStream());
+        return uploadedFileBaseUrl + "/uploads/" + fileName;
+    }
 
-        // Return image with proper content type
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(data);
+    public GridFSFile getFile(String fileId) {
+        return gridFsTemplate.findOne(
+            new Query(Criteria.where("_id").is(fileId))
+        );
     }
 }
