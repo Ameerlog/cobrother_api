@@ -141,7 +141,7 @@ public class LinkedInAuthController {
         // 2️⃣ Get LinkedIn profile
         LinkedInUserData profile = linkedInAuthService.getProfile(accessToken);
 
-        // 3️⃣ Login or Register user
+        // 3️⃣ Login or Register userī
         String jwtToken = linkedInAuthService.loginOrRegister(profile);
 
         // 4️⃣ Redirect to frontend with token in URL
