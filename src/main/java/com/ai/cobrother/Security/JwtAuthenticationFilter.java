@@ -32,11 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        // 🚀 Skip JWT check for LinkedIn OAuth endpoints
-        if (path.startsWith("/auth/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+       // 🚀 Skip JWT check for public endpoints
+if (path.startsWith("/auth/") ||
+    path.equals("/api/ListAllDomains") ||
+    path.equals("/api/ListAllBrands") ||
+    path.equals("/api/ListAllCoWorking") ||
+    path.equals("/api/SupportContactUs")) {
+    filterChain.doFilter(request, response);
+    return;
+}
 
         final String authHeader = request.getHeader("Authorization");
 
