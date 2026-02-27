@@ -1,22 +1,26 @@
 package com.ai.cobrother.Security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.*;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import java.util.List;
+
+import static jakarta.servlet.DispatcherType.ERROR;
+import static jakarta.servlet.DispatcherType.FORWARD;
 
 @Configuration
 @EnableWebSecurity
@@ -26,20 +30,28 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
+                        // IMPORTANT: allow internal error/forward dispatch
+                        .dispatcherTypeMatchers(ERROR, FORWARD).permitAll()
+
+                        // allow Spring Boot error endpoint
+                        .requestMatchers("/error").permitAll()
+
+                        // your public endpoints
+                        .requestMatchers("/", "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/linkedin/callback").permitAll()
-                        .requestMatchers("/","/auth/**").permitAll()
+
                         .requestMatchers("/api/SupportContactUs").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ListAllDomains").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ListAllBrands").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ListAllCoWorking").permitAll()
+
                         .anyRequest().authenticated()
                 )
 
@@ -47,10 +59,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        http.addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -60,12 +69,12 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://192.168.29.186:5173",
-            "https://start-up-tobe.vercel.app",
-            "https://www.cobrother.com",
-            "https://cobrother.com"
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://192.168.29.186:5173",
+                "https://start-up-tobe.vercel.app",
+                "https://www.cobrother.com",
+                "https://cobrother.com"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -83,8 +92,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
