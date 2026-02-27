@@ -1,5 +1,6 @@
 package com.ai.cobrother.Controller;
 
+import com.ai.cobrother.Model.CoBranding;
 import com.ai.cobrother.Model.CoCreation;
 import com.ai.cobrother.Service.CoCreationService;
 import org.springframework.beans.factory.annotation.Autowired;

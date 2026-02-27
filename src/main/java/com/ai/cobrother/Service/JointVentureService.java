@@ -4,8 +4,6 @@ import com.ai.cobrother.Model.Venture;
 import com.ai.cobrother.Repository.JointVentureRepo;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class JointVentureService {
 
@@ -18,6 +16,4 @@ public class JointVentureService {
     public Venture createJointVenture(Venture jv){
         return repo.save(jv);
     }
-
-    public List<Venture> getAllVentures() { return repo.findAll(); }
 }
