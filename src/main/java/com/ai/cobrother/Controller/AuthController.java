@@ -4,7 +4,6 @@ import com.ai.cobrother.Model.LinkedInAuthResponse;
 import com.ai.cobrother.Model.LinkedInUserData;
 import com.ai.cobrother.Model.User;
 import com.ai.cobrother.Security.JwtUtil;
-import com.ai.cobrother.Service.LinkedInAuthService;
 import com.ai.cobrother.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private LinkedInAuthService linkedInService;
+ 
 
     // ✅ LOCAL REGISTER
     @PostMapping("/register")
