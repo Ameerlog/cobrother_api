@@ -87,96 +87,18 @@
 
 
 
-
-package com.ai.cobrother.Controller;
-
-import com.ai.cobrother.Model.LinkedInAuthResponse;
-import com.ai.cobrother.Model.LinkedInUserData;
-import com.ai.cobrother.Service.LinkedInAuthService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-@RestController
-@RequestMapping("/auth")
-public class LinkedInAuthController {
-
-    private final LinkedInAuthService linkedInAuthService;
-
-    @Value("${linkedin.client.id:#{null}}")
-    private String clientId;
-
-    @Value("${linkedin.redirect.uri:#{null}}")
-    private String redirectUri;
-
-    public LinkedInAuthController(LinkedInAuthService service) {
-        this.linkedInAuthService = service;
-    }
-
-    // ✅ STEP 1 — Redirect to LinkedIn login
-    @GetMapping("/linkedin")
-    public void redirectToLinkedIn(HttpServletResponse response) throws IOException {
-
-        System.out.println("CLIENT ID: " + clientId);
-        System.out.println("REDIRECT URI: " + redirectUri);
-
-        String linkedinAuthUrl =
-                "https://www.linkedin.com/oauth/v2/authorization" +
-                        "?response_type=code" +
-                        "&client_id=" + clientId +
-                        "&redirect_uri=" + redirectUri +
-                        "&scope=openid profile email";
-
-        response.sendRedirect(linkedinAuthUrl);
-    }
-
-    // ✅ STEP 2 — Handle callback (supports both JSON and redirect responses)
-    @GetMapping("/linkedin/callback")
-    public Object handleCallback(
-            @RequestParam("code") String code,
-            @RequestParam(value = "redirect", required = false) String redirectParam,
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-
-        // 1️⃣ Get access token
-        String accessToken = linkedInAuthService.getAccessToken(code);
-
-        // 2️⃣ Get LinkedIn profile
-        LinkedInUserData profile = linkedInAuthService.getProfile(accessToken);
-
-        // 3️⃣ Login or Register user
-        String jwtToken = linkedInAuthService.loginOrRegister(profile);
-
-        // 4️⃣ Check Accept header to determine response type
-        String acceptHeader = request.getHeader("Accept");
-        boolean isJsonRequest = acceptHeader != null && acceptHeader.contains("application/json");
-
-        // If JSON request (API call)
-        if (isJsonRequest) {
-            LinkedInAuthResponse authResponse = new LinkedInAuthResponse(
-                    jwtToken,
-                    profile.getEmail(),
-                    profile.getFirstName() + " " + profile.getLastName()
-            );
-            return ResponseEntity.ok(authResponse);
-        }
-
-        // If redirect request (OAuth flow) - use provided redirect URL or default
-        String finalRedirectUrl = redirectParam != null && !redirectParam.isEmpty()
-                ? redirectParam
-                : "/coworker-form";
-
-        // Ensure URL has token parameter
-        String redirectUrlWithToken = finalRedirectUrl.contains("?")
-                ? finalRedirectUrl + "&token=" + jwtToken
-                : finalRedirectUrl + "?token=" + jwtToken;
-
-        response.sendRedirect(redirectUrlWithToken);
-        return null;
-    }
-
-}
+/*
+ * ⚠️  DEPRECATED - CONSOLIDATED INTO AuthController
+ * 
+ * This controller was removed to resolve Render deployment error:
+ * "Ambiguous mapping POST /auth/linkedin" conflict
+ * 
+ * LinkedIn authentication is now consolidated in AuthController.java:
+ * - POST /auth/linkedin → AuthController#linkedinLogin()
+ * 
+ * LinkedInAuthService is properly injected in AuthController.
+ * User model has email, firstname, lastname fields with setters.
+ * 
+ * This file should be deleted from git and version control.
+ * Keep as reference only.
+ */
