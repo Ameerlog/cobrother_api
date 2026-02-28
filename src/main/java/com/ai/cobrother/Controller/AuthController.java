@@ -48,33 +48,4 @@ public class AuthController {
 
         return Map.of("token", token);
     }
-
-    // ✅ LINKEDIN LOGIN - POST endpoint for OAuth code exchange
-    @PostMapping("/linkedin")
-    public ResponseEntity<LinkedInAuthResponse> linkedinLogin(@RequestBody Map<String, String> body) {
-
-        String code = body.get("code");
-
-        if (code == null || code.isEmpty()) {
-            throw new RuntimeException("LinkedIn authorization code is missing");
-        }
-
-        // Step 1: Get access token
-        String accessToken = linkedInService.getAccessToken(code);
-
-        // Step 2: Get profile
-        LinkedInUserData profile = linkedInService.getProfile(accessToken);
-
-        // Step 3: Login or register user + generate JWT
-        String jwt = linkedInService.loginOrRegister(profile);
-
-        // Step 4: Return structured response
-        LinkedInAuthResponse authResponse = new LinkedInAuthResponse(
-                jwt,
-                profile.getEmail(),
-                profile.getFirstName() + " " + profile.getLastName()
-        );
-
-        return ResponseEntity.ok(authResponse);
-    }
 }

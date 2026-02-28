@@ -71,7 +71,8 @@ public class SecurityConfig {
                 "http://192.168.29.186:5173",
                 "https://start-up-tobe.vercel.app",
                 "https://www.cobrother.com",
-                "https://cobrother.com"
+                "https://cobrother.com",
+                "http://localhost:3000"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
