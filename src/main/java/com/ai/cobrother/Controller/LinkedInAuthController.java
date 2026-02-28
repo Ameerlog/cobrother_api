@@ -179,28 +179,4 @@ public class LinkedInAuthController {
         return null;
     }
 
-    // ✅ Alternative POST endpoint for API calls with redirect parameter
-    @PostMapping("/linkedin")
-    public ResponseEntity<LinkedInAuthResponse> linkedInAuthPost(
-            @RequestParam("code") String code,
-            HttpServletRequest request) {
-
-        // 1️⃣ Get access token
-        String accessToken = linkedInAuthService.getAccessToken(code);
-
-        // 2️⃣ Get LinkedIn profile
-        LinkedInUserData profile = linkedInAuthService.getProfile(accessToken);
-
-        // 3️⃣ Login or Register user
-        String jwtToken = linkedInAuthService.loginOrRegister(profile);
-
-        // 4️⃣ Return JSON response for API calls
-        LinkedInAuthResponse authResponse = new LinkedInAuthResponse(
-                jwtToken,
-                profile.getEmail(),
-                profile.getFirstName() + " " + profile.getLastName()
-        );
-
-        return ResponseEntity.ok(authResponse);
-    }
 }

@@ -1,11 +1,13 @@
 package com.ai.cobrother.Controller;
 
+import com.ai.cobrother.Model.LinkedInAuthResponse;
 import com.ai.cobrother.Model.LinkedInUserData;
 import com.ai.cobrother.Model.User;
 import com.ai.cobrother.Security.JwtUtil;
 import com.ai.cobrother.Service.LinkedInAuthService;
 import com.ai.cobrother.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -47,9 +49,9 @@ public class AuthController {
         return Map.of("token", token);
     }
 
-    // ✅ LINKEDIN LOGIN
+    // ✅ LINKEDIN LOGIN - POST endpoint for OAuth code exchange
     @PostMapping("/linkedin")
-    public Map<String, Object> linkedinLogin(@RequestBody Map<String, String> body) {
+    public ResponseEntity<LinkedInAuthResponse> linkedinLogin(@RequestBody Map<String, String> body) {
 
         String code = body.get("code");
 
@@ -66,10 +68,13 @@ public class AuthController {
         // Step 3: Login or register user + generate JWT
         String jwt = linkedInService.loginOrRegister(profile);
 
-        return Map.of(
-                "token", jwt,
-                "email", profile.getEmail(),
-                "name", profile.getFirstName() + " " + profile.getLastName()
+        // Step 4: Return structured response
+        LinkedInAuthResponse authResponse = new LinkedInAuthResponse(
+                jwt,
+                profile.getEmail(),
+                profile.getFirstName() + " " + profile.getLastName()
         );
+
+        return ResponseEntity.ok(authResponse);
     }
 }
