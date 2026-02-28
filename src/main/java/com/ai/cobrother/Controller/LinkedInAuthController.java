@@ -90,11 +90,14 @@
 
 package com.ai.cobrother.Controller;
 
+import com.ai.cobrother.Model.LinkedInAuthResponse;
 import com.ai.cobrother.Model.LinkedInUserData;
 import com.ai.cobrother.Service.LinkedInAuthService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -131,9 +134,13 @@ public class LinkedInAuthController {
         response.sendRedirect(linkedinAuthUrl);
     }
 
-    // ✅ STEP 2 — Handle callback
+    // ✅ STEP 2 — Handle callback (supports both JSON and redirect responses)
     @GetMapping("/linkedin/callback")
-    public void handleCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+    public Object handleCallback(
+            @RequestParam("code") String code,
+            @RequestParam(value = "redirect", required = false) String redirectParam,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
 
         // 1️⃣ Get access token
         String accessToken = linkedInAuthService.getAccessToken(code);
@@ -141,12 +148,59 @@ public class LinkedInAuthController {
         // 2️⃣ Get LinkedIn profile
         LinkedInUserData profile = linkedInAuthService.getProfile(accessToken);
 
-        // 3️⃣ Login or Register userī
+        // 3️⃣ Login or Register user
         String jwtToken = linkedInAuthService.loginOrRegister(profile);
 
-        // 4️⃣ Redirect to frontend with token in URL
-        String frontendUrl = "https://cobrother.com/login?token=" + jwtToken;
+        // 4️⃣ Check Accept header to determine response type
+        String acceptHeader = request.getHeader("Accept");
+        boolean isJsonRequest = acceptHeader != null && acceptHeader.contains("application/json");
 
-        response.sendRedirect(frontendUrl);
+        // If JSON request (API call)
+        if (isJsonRequest) {
+            LinkedInAuthResponse authResponse = new LinkedInAuthResponse(
+                    jwtToken,
+                    profile.getEmail(),
+                    profile.getFirstName() + " " + profile.getLastName()
+            );
+            return ResponseEntity.ok(authResponse);
+        }
+
+        // If redirect request (OAuth flow) - use provided redirect URL or default
+        String finalRedirectUrl = redirectParam != null && !redirectParam.isEmpty()
+                ? redirectParam
+                : "/coworker-form";
+
+        // Ensure URL has token parameter
+        String redirectUrlWithToken = finalRedirectUrl.contains("?")
+                ? finalRedirectUrl + "&token=" + jwtToken
+                : finalRedirectUrl + "?token=" + jwtToken;
+
+        response.sendRedirect(redirectUrlWithToken);
+        return null;
+    }
+
+    // ✅ Alternative POST endpoint for API calls with redirect parameter
+    @PostMapping("/linkedin")
+    public ResponseEntity<LinkedInAuthResponse> linkedInAuthPost(
+            @RequestParam("code") String code,
+            HttpServletRequest request) {
+
+        // 1️⃣ Get access token
+        String accessToken = linkedInAuthService.getAccessToken(code);
+
+        // 2️⃣ Get LinkedIn profile
+        LinkedInUserData profile = linkedInAuthService.getProfile(accessToken);
+
+        // 3️⃣ Login or Register user
+        String jwtToken = linkedInAuthService.loginOrRegister(profile);
+
+        // 4️⃣ Return JSON response for API calls
+        LinkedInAuthResponse authResponse = new LinkedInAuthResponse(
+                jwtToken,
+                profile.getEmail(),
+                profile.getFirstName() + " " + profile.getLastName()
+        );
+
+        return ResponseEntity.ok(authResponse);
     }
 }

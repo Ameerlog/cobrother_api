@@ -118,6 +118,11 @@ public class LinkedInAuthService {
                             passwordEncoder.encode(UUID.randomUUID().toString())
                     );
 
+                    // Store LinkedIn profile info
+                    newUser.setEmail(profile.getEmail());
+                    newUser.setFirstname(profile.getFirstName());
+                    newUser.setLastname(profile.getLastName());
+
                     return userRepo.save(newUser);
                 });
 
@@ -126,6 +131,32 @@ public class LinkedInAuthService {
 
         // ✅ STEP 4 — Generate JWT
         return jwtUtil.generateToken(user.getUsername());
+    }
+
+    // Helper method to get profile with user data
+    public LinkedInAuthResponseData getAuthResponse(LinkedInUserData profile, String jwtToken) {
+        return new LinkedInAuthResponseData(
+                jwtToken,
+                profile.getEmail(),
+                profile.getFirstName() + " " + profile.getLastName()
+        );
+    }
+
+    // Inner class for response
+    public static class LinkedInAuthResponseData {
+        public String token;
+        public String email;
+        public String name;
+
+        public LinkedInAuthResponseData(String token, String email, String name) {
+            this.token = token;
+            this.email = email;
+            this.name = name;
+        }
+
+        public String getToken() { return token; }
+        public String getEmail() { return email; }
+        public String getName() { return name; }
     }
 
 
