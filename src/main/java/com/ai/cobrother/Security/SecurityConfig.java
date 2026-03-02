@@ -36,13 +36,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        // allow Spring internal error/forward dispatch
                         .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
-
-                        // allow Spring Boot error endpoint
                         .requestMatchers("/error").permitAll()
 
-                        // public endpoints
                         .requestMatchers("/", "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/linkedin/callback").permitAll()
 
@@ -50,6 +46,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/ListAllDomains").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ListAllBrands").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ListAllCoWorking").permitAll()
+
+                        // ✅ FIX: allow images
+                        .requestMatchers(HttpMethod.GET, "/api/images/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
